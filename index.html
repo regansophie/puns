@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="utils.js"></script>
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugin-survey-html-form.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-instructions.js"></script>
+    <script src="jspsych/plugin-image-button-response.js"></script>
+
+
+
+    
+    <style>
+      img {
+        width:200px;
+        height:200px;
+      }
+
+      button > img {
+        display:block;
+      }
+
+      input[type="checkbox"] {
+        display:none;
+      }
+
+      label > img {
+        margin:10px;
+        border:10px solid #f0f0f0;
+      }
+      
+      input:checked + label > img {
+        border:10px solid #ff0000;
+      }
+    </style>
+  </head>
+  
+  <body>
+  </body>
+  
+  <script>
+
+    const consent_form = [
+        'consent form/consentFormPt1.jpg',
+        'consent form/consentFormPt2.jpg',
+        'consent form/consentFormPt3.jpg',
+        'consent form/consentFormPt4.jpg',
+        'consent form/consentFormPt5.jpg'
+    ];
+
+    const type_of_thing = [
+        'novel about a ',
+        'movie about a ',
+        'tv show about a',
+        'song about a '        
+      ]
+
+    const items = [
+        'cat',
+        'dog',
+        'bird',
+        'fairy',
+        'bear',
+        'rabbit',
+        'dragon',
+        'wizard',
+        'mermaid',
+        'robot',
+        'pirate',
+        'unicorn',
+        'ghost',
+        'vampire',
+        'superhero'
+    ];
+
+    const actions = [
+        'becomes the president',
+        'goes to outerspace',
+        'lives in Paris',
+        'loves playing golf',
+        'learns to fly',
+        'discovers hidden treasure',
+        'becomes a famous actor',
+        'travels through time',
+        'wins the lottery',
+        'saves the world',
+        'becomes a renowned chef',
+        'writes a bestselling novel',
+        'learns to speak a new language',
+        'builds a time machine'
+      ]
+
+    const associated_words = {
+      cat: "paws, whiskers, tail, ears, kitten, meow, pet, fur, claw, scratch",
+      dog: "paws, tail, ears, bark, loyal, fetch, canine, fur, leash, obedient",
+      bird: "wings, feathers, beak, nest, chirp, flight, avian, song, perching, flock",
+      fairy: "wings, magic, wand, pixie, enchanted, sparkle, mystical, flutter, ethereal, charm",
+      bear: "paws, fur, claws, growl, hibernate, wilderness, strength, grizzly, cub, fishing",
+      rabbit: "ears, fluffy, hop, burrow, carrot, buck, bunny, thump, warren, nibble",
+      dragon: "scales, fire, wings, breath, mythical, treasure, serpent, majestic, fierce, fantasy",
+      wizard: "magic, spell, wand, robe, sorcery, enchantment, staff, potion, mystical, sage",
+      mermaid: "tail, scales, ocean, seashell, aquatic, enchanting, underwater, siren, coral, pearl",
+      robot: "mechanical, circuit, AI, automation, futuristic, android, programmed, cyborg, technology, metal",
+      pirate: "ship, treasure, plunder, parrot, sword, plunder, captain, adventure, booty, matey",
+      unicorn: "horn, mane, mystical, magical, rainbow, fantasy, ethereal, enchanted, pure, legendary",
+      ghost: "spirit, haunt, apparition, eerie, supernatural, spectral, phantom, ethereal, spooky, translucent",
+      vampire: "fangs, bat, immortal, blood, nocturnal, undead, cloak, bite, curse, thirst",
+      superhero: "cape, mask, powers, justice, heroism, secret identity, strength, courage, crime-fighter, vigilant"
+    };
+
+    const associate_action_words = [
+      "politics, White House, America, government, democracy, elections",
+      "astronaut, space, NASA, stars, galaxy, exploration, spacecraft",
+      "city, France, Eiffel Tower, culture, romance, architecture, cuisine",
+      "sport, clubs, green, tee, fairway, tournament, golfer",
+      "pilot, aviation, wings, sky, aircraft, cockpit, altitude",
+      "adventure, map, chest, gold, pirate, treasure hunt, compass",
+      "film, Hollywood, stage, celebrity, performance, director, screenplay",
+      "time travel, past, future, paradox, timeline, continuum, era",
+      "money, luck, jackpot, ticket, millionaire, fortune, wealth",
+      "hero, crisis, disaster, rescue, salvation, bravery, valor",
+      "cooking, cuisine, restaurant, recipe, culinary, gastronomy, chef",
+      "book, author, fiction, plot, characters, bestseller, literature",
+      "language, fluency, communication, vocabulary, grammar, linguistics, dialect",
+      "invention, science, paradox, future, past, discovery, innovation"
+    ];
+
+
+
+
+    let session;
+    init();
+
+    async function init() {
+      const jsPsych = initJsPsych();
+
+      console.log("Loading image data...");
+      response = await fetch("image-data.json");
+      imageData = await response.json();
+
+      console.log("Done. Creating session...")
+      session = new Session(jsPsych);
+
+      console.log("Done. Beginning session.");
+      session.run();
+    }
+    
+
+    class Session {
+        // setup the possible factors in the design
+      // imageData is a (structured) collection of image file paths.
+      constructor(jsPsych) {
+        this.jsPsych = jsPsych;
+      
+
+        // Generate trials
+        this.timeline = [];
+
+        this.timeline.push ({
+          type: jsPsychSurveyText,
+          preamble : "Please type in your first and last name and SID." + "<br>" + "This will allow us to give you credit for your participation, but your name will in no way be connected to your answers in the first part of the survey", 
+          questions: [
+            {prompt: 'Enter your first and last name:'},
+            {prompt: 'Please type in your numeric Student Identification Number (SID):'}
+          ]
+       })
+      
+         /* for (let i=0; i<4; i++){
+          this.timeline.push ({
+            type: jsPsychImageButtonResponse,
+            stimulus: consent_form[i],
+            stimulus_height: 650,
+            choices: ['Next']
+      });
+    }
+        this.timeline.push ({
+          type: jsPsychImageButtonResponse,
+          stimulus: 'consent form/consentFormPt5.jpg',
+          stimulus_height: 650,
+          choices: ['I consent', 'I do not consent'],
+          prompt: "<p>Do you consent to participating in this experiment?</p>",
+      });
+*/
+
+        this.timeline.push ({
+          type: jsPsychInstructions,
+          pages: ['This is a study about how people generate <strong> puns. </strong>' + "<br>" + "A pun is a form of word play that exploits multiple meanings of a term, or of similar-sounding words, for an intended humorous or rhetorical effect. On the following pages, you will read some examples of puns.",
+            '<h2>Homographic Puns</h2>' + 
+            "When your pun relies on the way words sound alike but have different meanings and spellings, it's a homophonic pun. Homophonic puns use homophones or near-homophones to be funny - the punchline is in the double meaning of the word.<br><br>" +
+            "Examples of homophonic puns are:" + "<br>" + 
+            "A bicycle can't stand on its own because it is two-tired." + "<br>" +
+            "No matter how much you push the envelope, it will still be stationery." + "<br>" +
+            "A pessimist's blood type is always B-negative." + "<br>" +
+            "Two peanuts walk into a bar, and one was a-salted." + "<br>" +
+            "reading while sunbathing makes you well-red."+ "<br>"],
+          button_label_next: "Continue",
+          show_clickable_nav: true,
+          allow_backward: true
+
+          })
+
+        this.timeline.push({
+          type: jsPsychInstructions,
+          pages: [
+            '<h2>Homographic Puns</h2>' +
+            'You\'ll find homographs, which are defined as words that are spelled the same way but have different meanings, in homographic puns. Homographic puns are also known as heteronymic ("same name") puns. They\'re funny because they\'re true in both interpretations of the word, and they are best understood when read.<br><br>' +
+            'Homographic pun examples include:<br>' +
+            '<ul>' +
+            'After hours of waiting for the bowling alley to open, we finally got the ball rolling.' + "<br>" +
+            'Always trust a glue salesman. They tend to stick to their word.' + "<br>" +
+            'Every calendar\'s days are numbered.' + "<br>" +
+            'A dog gave birth to puppies near the road and was cited for littering.' + "<br>" +
+            'If you don\'t pay your exorcist, you will get repossessed.' + "<br>" +
+            '</ul>'
+          ],
+          button_label_next: "Continue",
+          show_clickable_nav: true,
+          allow_backward: true
+        });
+
+      this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+          '<h2>Fun Puns Examples</h2>' +
+          'Here are some example puns!<br><br>' +
+          '<li>Santa Claus\' helpers are known as subordinate Clauses.</li>' +
+          '<li>She had a photographic memory but never developed it.</li>' +
+          '<li>The two pianists had a good marriage. They always were in a chord.</li>' +
+          '<li>I was struggling to figure out how lightning works, but then it struck me.</li>' +
+          '<li>The grammarian was very logical. He had a lot of comma sense.</li>' +
+          '<li>A chicken farmer\'s favorite car is a coupe.</li>' +
+          '<li>What do you call a person rabid with wordplay? An energizer punny.</li>' +
+          '<li>I\'ve been to the dentist many times, so I know the drill.</li>' +
+          '<li>What did one plant say to another? "What\'s stomata?"</li>' +
+          '<li>The other day I held the door open for a clown. I thought it was a nice jester.</li>' +
+          '<li>A chicken crossing the road is truly poultry in motion.</li>' +
+          '<li>The politician is not one for Indian food. But he\'s good at currying favors.</li>' +
+          '<li>How do construction workers party? They raise the roof.</li>' +
+          '<li>A boiled egg every morning is hard to beat.</li>' +
+          '<li>When a woman returns new clothing, that\'s post-traumatic dress syndrome.</li>' +
+          '<li>Two antennas met on a roof, fell in love and got married. The ceremony wasn\'t much, but the reception was brilliant!</li>' +
+          '<li>My math teacher called me average. She\'s so mean!</li>' +
+          '<li>I went to a seafood disco last week and pulled a mussel.</li>' +
+          '<li>Guerrilla warfare is more than just throwing a banana.</li>' +
+          '<li>The cartoon animator felt imprisoned by his job. He could not free himself from his cel.</li>' +
+          '<li>I thought Santa was going to be late, but he arrived in the Nick of time.</li>' 
+        ],
+        button_label_next: "Continue",
+        show_clickable_nav: true,
+        allow_backward: true
+      });
+      
+      this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+          '<h2>Now you will create your own puns!</h2>' +
+          'On the following pages, you will come up with your own puns based on selected topics. For example, you might be asked to come up with a pun that would be a good name for a movie about a baker who becomes a detective. You could call this "Whisky Business".' + "<br>" + 'Then, there will be a text box where you can explain why your pun is funny. For example, if the pun were "Whisky Business," then you could say, "It is funny because bakers use whisks and there is already a movie calle Risky Business, and Whisky sounds like Risky."' + "<br>" + 'For each pun you create, there will also be a list of words that are associated with the target words, which might help you to come up with a good pun.'],
+        button_label_next: "Continue",
+        show_clickable_nav: true,
+        allow_backward: true
+      });
+
+      this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+          '<h2> Some notes before we begin!</h2>' +
+          'We are specifically testing how YOU come up with puns, so it is VERY important that you do not use any outside sources to help you.' + "<br>" +
+          'Please do not use the internet at all, especially programs like ChatGPT. We will be able to tell if you do this, and you will not get any credit if you do.'],
+        button_label_next: "Continue",
+        show_clickable_nav: true,
+        allow_backward: true
+      });
+
+      this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+          '<h2> Those are all the instructions! We hope you have fun!</h2>' ],
+        button_label_next: "Continue",
+        show_clickable_nav: true,
+        allow_backward: true
+      });
+
+    for (let i=0; i<7; i++){
+
+        const randomIndex_1 = Math.floor(Math.random() * 4); // Generates a random integer between 0 and 9
+        const randomIndex_2 = Math.floor(Math.random() * 10); // Generates a random integer between 0 and 9
+        const randomIndex_3 = Math.floor(Math.random() * 10); // Generates a random integer between 0 and 9
+
+
+        this.timeline.push ({
+          type: jsPsychSurveyText,
+          preamble: "The title of a " + type_of_thing[randomIndex_1] + items[randomIndex_2] + " who " + actions[randomIndex_3] + "<br>" + 
+          'Here are some words associated with ' + "<strong>" + items[randomIndex_2] + "</strong>" + ': ' + associated_words[items[randomIndex_2]] + "<br>" + 
+          'Here are some words associated with ' + "<strong>" + actions[randomIndex_3] + "</strong>"+ ': ' + associate_action_words[randomIndex_3],
+          questions: [
+            {prompt: 'Enter your pun below:'},
+            {prompt: 'Please explain why that is funny:', rows: 5}
+          ]
+          })
+      }
+
+
+        this.timeline.push({
+          type: jsPsychPipe,
+          action: "save",
+          experiment_id: "fKcRGgLj9CtX",
+          filename: `experiment_data${Math.floor(Math.random()*1000)}.csv`,
+          //filename: `experiment_data33333.csv`,
+          data_string: function () {
+            return jsPsych.data.get().csv()
+          }
+        }); 
+
+
+        this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+        '<p>You have finished the experiment. Thank you for participating. Your response has been recorded.',
+        ],
+        show_clickable_nav: true,
+        allow_backward: false,
+        button_label_next: "Exit"
+    });
+        
+      }
+
+      run() {
+        this.jsPsych.run(this.timeline);
+      }
+    }
+    
+
+
+  </script>
+</html>
